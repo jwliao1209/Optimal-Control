@@ -1,6 +1,108 @@
 import numpy as np
 from typing import Tuple, Optional
-from scipy.linalg import expm, solve_continuous_are, solve_discrete_are
+from numpy.linalg import inv
+from scipy.linalg import eig, expm, ordqz
+# from scipy.linalg import solve_discrete_are, solve_continuous_are
+
+
+def solve_continuous_are(
+    A: np.ndarray,
+    B: np.ndarray,
+    Q: np.ndarray,
+    R: np.ndarray,
+) -> np.ndarray:
+    """
+    Solve the continuous-time algebraic Riccati equation (CARE)
+    P = A^T P + P A - P B R^{-1} B^T P + Q
+    via a symplectic pencil and eigenvalue decomposition.
+    """
+
+    # Construct Hamiltonian matrix
+    H = np.block(
+        [
+            [A, -B @ inv(R) @ B.T],
+            [-Q,             -A.T],
+        ]
+    )
+
+    # Compute eigenvalue decomposition
+    eigvals, eigvecs = eig(H)
+
+    # Choose stable eigenvalues
+    select = eigvals.real < 0
+    eigvecs_stable = eigvecs[:, select]
+
+    # Split into X, Y
+    n = A.shape[0]
+    X = eigvecs_stable[:n, :]
+    Y = eigvecs_stable[n:, :]
+
+    # Solve for P
+    P = Y @ np.linalg.inv(X)
+    P = P.real
+    return P
+
+
+def solve_discrete_are(A, B, Q, R):
+    """
+    Solve the discrete-time algebraic Riccati equation (DARE)
+    X = A^T X A - (A^T X B + S) (R + B^T X B)^{-1} (B^T X A + S^T) + Q
+    via a symplectic pencil and ordered QZ (generalized Schur) decomposition.
+
+    If S is provided (cross term), we first apply the standard completion-of-squares
+    reduction to an equivalent problem without cross term:
+        Ã = A - B R^{-1} S^T
+        Q̃ = Q - S R^{-1} S^T
+        R̃ = R
+        B̃ = B
+    Then we solve the S=0 case for (Ã,B̃,Q̃,R̃).
+
+    Returns
+    -------
+    X : ndarray (n,n)  -- stabilizing solution (symmetric if symmetrize=True)
+    K : ndarray (m,n)  -- corresponding optimal feedback gain K = (R + B^T X B)^{-1}(B^T X A + S^T)
+    """
+    A = np.atleast_2d(A)
+    B = np.atleast_2d(B)
+    Q = np.atleast_2d(Q)
+    R = np.atleast_2d(R)
+    n, m = B.shape
+
+    S = np.zeros((n, m))
+
+    # Complete the square to remove cross term:
+    Rinv = inv(R)
+    A_tilde = A - B @ Rinv @ S.T
+    Q_tilde = Q - S @ Rinv @ S.T
+    # Now solve the S = 0 DARE for (A_tilde, B, Q_tilde, R)
+
+    # Build the symplectic pencil (M - λ N) of size 2n × 2n:
+    BRB = B @ Rinv @ B.T
+    M = np.block(
+        [
+            [A_tilde,                 np.zeros((n, n))],
+            [-Q_tilde,                np.eye(n)       ],
+        ]
+    )
+    N = np.block(
+        [
+            [np.eye(n),               BRB      ],
+            [np.zeros((n, n)),        A_tilde.T],
+        ]
+    )
+
+    # Generalized Schur (QZ) with ordering: inside unit circle first ('iuc')
+    # qz returns AA, BB, Q, Z s.t. Q^T M Z = AA, Q^T N Z = BB (real case) up to conventions.
+    # ordqz reorders to put desired eigenvalues (|alpha/beta|<1) leading.
+    AA, BB, alpha, beta, Qqz, Zqz = ordqz(M, N, sort='iuc')
+
+    # Extract the right Schur vectors (columns of Zqz) spanning stable invariant subspace:
+    Z1 = Zqz[:n, :n]    # U1
+    Z2 = Zqz[n:, :n]    # U2
+
+    # X = U2 U1^{-1}
+    X = Z2 @ inv(Z1)
+    return X
 
 
 class BaseLQR:
