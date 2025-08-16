@@ -161,6 +161,19 @@ classic-control = [
 ]
 
 [[package]]
+name = "imageio"
+version = "2.37.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pillow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0c/47/57e897fb7094afb2d26e8b2e4af9a45c7cf1a405acdeeca001fdf2c98501/imageio-2.37.0.tar.gz", hash = "sha256:71b57b3669666272c818497aebba2b4c5f20d5b37c81720e5e1a56d59c492996", size = 389963 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl", hash = "sha256:11efa15b87bc7871b61590326b2d635439acc321cf7f8ce996f812543ce10eed", size = 315796 },
+]
+
+[[package]]
 name = "jinja2"
 version = "3.1.6"
 source = { registry = "https://pypi.org/simple" }
@@ -535,6 +548,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "gymnasium", extra = ["classic-control"] },
+    { name = "imageio" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "omegaconf" },
@@ -546,6 +560,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "gymnasium", extras = ["classic-control"], specifier = ">=1.2.0" },
+    { name = "imageio", specifier = ">=2.37.0" },
     { name = "matplotlib", specifier = ">=3.10.5" },
     { name = "numpy", specifier = ">=2.3.2" },
     { name = "omegaconf", specifier = ">=2.3.0" },

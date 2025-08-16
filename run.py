@@ -41,6 +41,7 @@ class Runner:
 
     def run(self, n_episodes=1, max_steps=10000, seed_offset=0, deadband=0.0):
         for ep in range(n_episodes):
+            self.env.start_recording(fps=30, step_capture="post")
             obs = self.env.reset(seed=seed_offset + ep)
             if hasattr(self.controller, "reset_episode"):
                 self.controller.reset_episode()
@@ -58,6 +59,9 @@ class Runner:
                 if done:
                     break
             print(f"[Runner] Episode {ep}: return={total_r}")
+
+        self.env.stop_recording()
+        self.env.save_gif("cartpole_run.gif")
         self.env.close()
 
 

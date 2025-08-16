@@ -3,6 +3,7 @@ Learning and optimizing controllers for the classic cart–pole task, with two a
 - LQR (Continuous & Discrete): classic linear optimal control around the upright.
 - iLQR: nonlinear iterative LQR with a receding horizon.
 
+![demo](assets/clqr.gif)
 
 ## Setup
 To set up the environment and install all required packages:
