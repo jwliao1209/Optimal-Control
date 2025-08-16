@@ -1,0 +1,23 @@
+name: ilqr
+params:                      # Physical parameters
+  g: 9.8                     # Gravity acceleration (m/s^2)
+  m_c: 1.0                   # Mass of cart (kg)
+  m_p: 0.1                   # Mass of pole (kg)
+  l: 0.5                     # Half-length of the pole (m)
+  force_mag: 10.0            # Nominal force magnitude (N)
+  Q: [1.5, 0.2, 30.0, 12.0]  # State cost diagonal weight (continuous-time)
+  Qf: [5.0, 0.0, 15.0, 0.0]  # Terminal cost diagonal weight (continuous-time)
+  R: [2.0]                   # Control cost weight (continuous-time)
+controller:
+  max_iter: 50
+  tol: 1e-6
+runner_args:
+  max_episode_steps: 10000
+  dt: 0.02
+  force_mag: 10.0
+  T_hor: 2.0               # Shorter horizon works well for MPC
+  render_mode: human
+run_params:
+  max_steps: 1000
+  seed: 0
+  mode: "bangbang"

@@ -1,0 +1,15 @@
+[project]
+name = "optimal-control"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gymnasium[classic-control]>=1.2.0",
+    "matplotlib>=3.10.5",
+    "numpy>=2.3.2",
+    "omegaconf>=2.3.0",
+    "pygame>=2.6.1",
+    "scipy>=1.16.1",
+    "torch>=2.8.0",
+]
